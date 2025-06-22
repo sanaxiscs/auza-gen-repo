@@ -7,7 +7,7 @@ local function highlightCharacter(character)
 	if not character:FindFirstChild("Highlight") then
 		local highlight = Instance.new("Highlight")
 		highlight.Name = "Highlight"
-		highlight.FillColor = Color3.fromRGB(255, 255, 0) -- Yellow
+		highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Yellow
 		highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
 		highlight.OutlineTransparency = 0.5
 		highlight.FillTransparency = 0.3
