@@ -1,40 +1,64 @@
--- Server Script inside ServerScriptService
-
 local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+local button = script.Parent
+local highlightsEnabled = false
 
--- Function to add highlight to a player's character
-local function highlightCharacter(character)
+-- Function to add a highlight to a character
+local function addHighlightToCharacter(character)
 	if not character:FindFirstChild("Highlight") then
 		local highlight = Instance.new("Highlight")
 		highlight.Name = "Highlight"
-		highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Yellow
+		highlight.FillColor = Color3.fromRGB(255, 255, 0) -- Yellow
+		highlight.FillTransparency = 0.3
 		highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
 		highlight.OutlineTransparency = 0.5
-		highlight.FillTransparency = 0.3
 		highlight.Adornee = character
 		highlight.Parent = character
 	end
 end
 
--- Called when a player's character spawns
-local function onCharacterAdded(character)
-	highlightCharacter(character)
-end
-
--- Called when a player joins the game
-local function onPlayerAdded(player)
-	player.CharacterAdded:Connect(onCharacterAdded)
-
-	-- If the character already exists
-	if player.Character then
-		highlightCharacter(player.Character)
+-- Remove highlight from character
+local function removeHighlightFromCharacter(character)
+	local highlight = character:FindFirstChild("Highlight")
+	if highlight then
+		highlight:Destroy()
 	end
 end
 
--- Connect existing and future players
-for _, player in pairs(Players:GetPlayers()) do
-	onPlayerAdded(player)
+-- Toggle all highlights
+local function toggleHighlights()
+	highlightsEnabled = not highlightsEnabled
+
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character then
+			if highlightsEnabled then
+				addHighlightToCharacter(player.Character)
+			else
+				removeHighlightFromCharacter(player.Character)
+			end
+		end
+	end
+
+	button.Text = highlightsEnabled and "Disable Highlights" or "Enable Highlights"
 end
 
-Players.PlayerAdded:Connect(onPlayerAdded)
+-- Update highlights when players respawn
+local function onCharacterAdded(character)
+	if highlightsEnabled then
+		addHighlightToCharacter(character)
+	end
+end
 
+-- Connect to new players
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(onCharacterAdded)
+end)
+
+for _, player in pairs(Players:GetPlayers()) do
+	if player ~= localPlayer then
+		player.CharacterAdded:Connect(onCharacterAdded)
+	end
+end
+
+-- Bind button
+button.MouseButton1Click:Connect(toggleHighlights)
